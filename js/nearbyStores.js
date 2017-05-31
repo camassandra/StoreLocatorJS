@@ -4,7 +4,10 @@ var info = document.getElementById('info'),
     radius: null,
     types: null
   },
- user = {
+  places = [],
+  markers = [],
+  infowindows = [],
+  user = {
 	position: {
 		latitude: null,
 		longitude: null
@@ -15,7 +18,7 @@ var info = document.getElementById('info'),
 function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(getPosition);
-        info.innerHTML = "Geolocation is working!!!";
+        //info.innerHTML = "Geolocation is working!!!";
     } else { 
     	info.innerHTML = "Geolocation is not supported by this browser.";
     }
@@ -56,19 +59,44 @@ function initMap(latitude, longitude) {
 	    types: ['store']
 	  };
   	var service = new google.maps.places.PlacesService(map);
+
   	service.nearbySearch(request, function(results, status) {
   	console.log('status is ', status);
     if (status == google.maps.places.PlacesServiceStatus.OK) {
-    	console.log('results are ', results);
+    	console.log('results are ', results.length, results);
       for (var i = 0; i < results.length; i++) {
-        var place = results[i];
         // If the request succeeds, draw the place location on
         // the map as a marker, and register an event to handle a
         // click on the marker.
         var marker = new google.maps.Marker({
           map: map,
-          position: place.geometry.location
+          position: results[i].geometry.location
         });
+        console.log (marker);
+        
+        var infowindow = new google.maps.InfoWindow(),
+			openedInfoHistory = [],
+            content = '<div><strong>' + results[i].name + '</strong><br>' +
+          'Address: ' + results[i].vicinity + '<br>' +
+          results[i].rating + '</div>';
+         document.getElementById('searchResults').innerHTML = content;
+		google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){ 
+
+	        return function() {
+ 				openedInfoHistory.push (infowindow);//can be used to check what has been clicked
+			  	console.info ("open history: ",openedInfoHistory);
+
+				for (var k =0; k<openedInfoHistory.length;k++){
+					openedInfoHistory[k].close();
+				}
+						console.info ("infowindows");
+
+	           infowindow.setContent(content);
+	           infowindow.open(map,marker);
+	        };
+	    })(marker,content,infowindow)); 
+
+      map.panTo(results[i].geometry.location);
       }
     }
   })
