@@ -90,7 +90,7 @@ function initMap(latitude, longitude) {
 	    types: ['store']
 	  };
   	var service = new google.maps.places.PlacesService(map),
-  	    contentList = '<tr><th>Business Name</th><th>Address</th><th>Rating</th></tr>';
+  	    contentList = '<tr><th>Business Name</th><th>Address</th><th>Rating</th><th>Distance</th></tr>';
 
   	service.search(request, function(results, status) {
   	console.log('status is ', status);
@@ -103,17 +103,19 @@ function initMap(latitude, longitude) {
         var marker = new google.maps.Marker({
           map: map,
           position: results[i].geometry.location
-        }),
-        
-            infowindow = new google.maps.InfoWindow(),
+        });
+        markers.push(marker); 
+            var infowindow = new google.maps.InfoWindow(),
 			openedInfoHistory = [],
             content = '<div><strong>' + results[i].name + '</strong><br>' +
            'Address: ' + results[i].vicinity +" " + checkRating(results,i) + '</div>';
-            contentList+='<tr>'+ '<td>' + results[i].name + '</td>' + '<td>' + results[i].vicinity + '</td>' + '<td>' + 
-            checkRating(results,i) + '</td>';
+            contentList+='<tr>'+ '<td>' + "<a href='javascript:google.maps.event.trigger(markers["+(markers.length-1)+"],\"click\");'>"+ results[i].name + '</a>' + '</td>' + '<td>' + results[i].vicinity + '</td>' + '<td>' + 
+            checkRating(results,i) + '</td>'+'<td>'+ google.maps.geometry.spherical.computeDistanceBetween(userLocation, results[i].geometry.location).toFixed(2) +'</td>';
+
+
 
 		google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){ 
-             	console.log(google.maps.geometry.spherical.computeDistanceBetween(userLocation, place.geometry.location).toFixed(2))
+             	console.log("Distance: ",google.maps.geometry.spherical.computeDistanceBetween(userLocation, results[i].geometry.location).toFixed(2))
 
 	        return function() {
  				openedInfoHistory.push (infowindow);//can be used to check what has been clicked
@@ -132,9 +134,35 @@ function initMap(latitude, longitude) {
       map.panTo(results[i].geometry.location);
       }
       document.getElementById('results').innerHTML = contentList;
+
+ 
+		sortTable('results',3,'disc');
+
     }
   })
   };
+
+     function sortTable(table, column, order){
+    var tbl = document.getElementById(table).tBodies[0];
+    var store = [];
+    console.info (tbl.rows.length)
+    for(var i=0, len=tbl.rows.length; i<len; i++){
+        var row = tbl.rows[i];
+        var sortnr = parseFloat(row.cells[column].textContent || row.cells[column].innerText);
+        if(!isNaN(sortnr)) store.push([sortnr, row]);
+    }
+    store.sort(function(x,y){
+    	if (order == 'asc'){
+     	   return x[0] - y[0];
+    	}else{
+    		return y[0] - x[0];
+    	}
+    });
+    for(var i=0, len=store.length; i<len; i++){
+        tbl.appendChild(store[i][1]);
+    }
+    store = null;
+}
   
 
 // Run the initialize function when the window has finished loading.
