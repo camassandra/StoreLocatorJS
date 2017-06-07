@@ -32,6 +32,36 @@ body {
 .kd-tabbed-vert.header-links .kd-tabbutton a:focus {
   text-decoration: none;
 }
+table{
+  width: 70%;
+  border-collapse: collapse; 
+  margin:50px auto;
+  border-width: 3px blue;
+}
+
+tr:nth-child(even) {
+    background-color: #e6e6e6;
+}
+
+th:first-child {
+    border-radius: 6px 0 0 0;
+    -moz-border-radius: 6px 0 0 0;
+    -webkit-border-radius: 6px 0 0 0;
+}
+th:last-child {
+    border-radius: 0 6px 0 0;
+    -moz-border-radius: 0 6px 0 0;
+    -webkit-border-radius: 0 6px 0 0;
+}
+
+
+td, th { 
+  padding: 10px; 
+  border: 1px solid #ccc; 
+  text-align: left; 
+  font-size: 18px;
+  }
+
 
 #floating-panel {
   position: absolute;
